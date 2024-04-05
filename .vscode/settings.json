@@ -1,0 +1,5 @@
+{
+    "code-runner.executorMap": {
+        "ocaml": "cd $dir && ocaml $fileName"
+    }
+}
