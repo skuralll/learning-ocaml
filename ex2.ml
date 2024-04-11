@@ -32,3 +32,65 @@ let sum_result = sum(rational1, rational2);;
 print_int(sum_result.num);;
 print_string("/");;
 print_int(sum_result.den);;
+print_endline "";;
+
+(* 単純なヴァリアント *)
+type furikake = Shake | Katsuo | Nori;;
+let isVeggie f =
+  match f with
+    Shake -> false
+  | Katsuo -> false
+  | Nori -> true
+;;
+Printf.printf "Shake: %B\n" (isVeggie(Shake));
+Printf.printf "Nori: %B\n" (isVeggie(Nori));
+
+(* 少し複雑なヴァリアント *)
+type miso = Aka | Shiro | Awase;;
+type gu = Wakame | Tofu | Radish;;
+type dish = PorkCutlet | Soup of {m: miso; g: gu} | Rice of furikake;; (* とんかつ | 味噌汁 | ご飯 *)
+let food = Soup{m=Aka;g=Tofu};;
+let isSolid d = 
+  match d with
+      PorkCutlet -> true
+    | Soup m_and_g -> false
+    | Rice f -> true
+;;
+Printf.printf "Soup: %B\n" (isSolid(Soup{m=Aka;g=Tofu}));;
+(* 付帯情報を使う *)
+let price_of_dish d = 
+    match d with
+      PorkCutlet -> 350
+    | Soup m_and_g -> 90
+    | Rice (Shake | Katsuo) -> 90 
+    | Rice Nori -> 80
+  ;;
+  Printf.printf "Shake: %d\n" (price_of_dish(Rice(Shake)));;
+(* 一品が菜食主義者でも食べられるかどうかを判定する関数 isVeggieDish : dish -> bool を定義せよ． *)
+let isVeggieDish d = 
+  match d with
+    PorkCutlet -> false
+  | Soup m_and_g -> true
+  | Rice f -> isVeggie f
+;;
+Printf.printf "PorkCutlet: %B\n" (isVeggieDish(PorkCutlet));;
+Printf.printf "Rice(Nori): %B\n" (isVeggieDish(Rice(Nori)));;
+(* 再帰ヴァリアント *)
+type menu = Smile | Add of {d: dish; next: menu};;
+let m1 : menu = Smile;;
+let m2 : menu = Add {d=PorkCutlet;next=m1};;
+let m3 : menu = Add {d=Rice Nori;next=m2};;
+let m4 : menu = Add {d=Rice Shake;next=m3};;
+let rec price_of_menu m =
+  match m with
+    Smile -> 0
+  | Add {d=d1;next=m'} -> price_of_dish d1 + price_of_menu m'
+;;
+Printf.printf "Menu: %d\n" (price_of_menu m4);;
+(* 定食が菜食主義者でも食べられるかどうかを判定する再帰関数 isVeggieMenu : menu -> bool を定義せよ． *)
+let rec isVeggieMenu m =
+  match m with
+    Smile -> true
+  | Add {d=d1;next=m'} -> isVeggieDish d1 && isVeggieMenu m'
+;;
+Printf.printf "Menu: %B\n" (isVeggieMenu m4);;
